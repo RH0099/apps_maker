@@ -1,11 +1,11 @@
 import os
 
 def create_project():
-    name = input("📂 নতুন প্রোজেক্টের নাম দিন: ")
+    name = input("📂 choose your project name: ")
     os.makedirs(name, exist_ok=True)
     with open(f"{name}/main.py", "w") as f:
-        f.write("# নতুন প্রোজেক্ট\nprint('Hello, World!')")
-    print(f"✅ {name} প্রোজেক্ট তৈরি হয়েছে!")
+        f.write("# New project\nprint('Hello, World!')")
+    print(f"✅ {name} project successful!")
 
 def edit_project():
     name = input("✍️ এডিট করতে প্রোজেক্টের নাম দিন: ")
