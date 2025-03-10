@@ -8,7 +8,7 @@ def create_project():
     print(f"✅ {name} project successful!")
 
 def edit_project():
-    name = input("✍️ এডিট করতে প্রোজেক্টের নাম দিন: ")
+    name = input("✍️ Enter the project name to edit: ")
     os.system(f"nano {name}/main.py")
 
 def run_project():
