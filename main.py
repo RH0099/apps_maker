@@ -12,18 +12,18 @@ def edit_project():
     os.system(f"nano {name}/main.py")
 
 def run_project():
-    name = input("🚀 চালাতে প্রোজেক্টের নাম দিন: ")
+    name = input("🚀 Name the project to: ")
     os.system(f"python {name}/main.py")
 
 def main():
     while True:
         print("\n🔹 Termux App Maker 🔹")
-        print("1️⃣ নতুন প্রোজেক্ট তৈরি")
-        print("2️⃣ কোড এডিট করুন")
-        print("3️⃣ প্রোজেক্ট রান করুন")
-        print("4️⃣ প্রস্থান করুন")
+        print("1️⃣ Create new project")
+        print("2️⃣ Code Edit")
+        print("3️⃣ Project start")
+        print("4️⃣ Exit")
         
-        choice = input("👉 আপনার অপশন: ")
+        choice = input("👉 your option 🔢: ")
 
         if choice == "1":
             create_project()
@@ -32,10 +32,10 @@ def main():
         elif choice == "3":
             run_project()
         elif choice == "4":
-            print("👋 বিদায়!")
+            print("👋 out!")
             break
         else:
-            print("❌ ভুল অপশন!")
+            print("❌ Wrong option!")
 
 if __name__ == "__main__":
     main()
