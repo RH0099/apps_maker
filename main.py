@@ -1,41 +1,46 @@
 import os
+import time
+import pyfiglet
 
-def create_project():
-    name = input("📂 choose your project name: ")
-    os.makedirs(name, exist_ok=True)
-    with open(f"{name}/main.py", "w") as f:
-        f.write("# New project\nprint('Hello, World!')")
-    print(f"✅ {name} project successful!")
+def banner():
+    os.system("clear")
+    print("\033[1;32m" + pyfiglet.figlet_format("APP BUILDER"))
+    print("\033[1;34m" + "="*40)
+    print("\033[1;33m  ⚡ Android App Builder for Termux ⚡")
+    print("\033[1;34m" + "="*40 + "\n")
 
-def edit_project():
-    name = input("✍️ Enter the project name to edit: ")
-    os.system(f"nano {name}/main.py")
+def create_app():
+    banner()
+    code = input("\033[1;36m[+] Enter Your Apps Code: \033[1;32m")
+    
+    if not code.strip():
+        print("\033[1;31m[!] ⚠️ Enter Your Code")
+        time.sleep(2)
+        create_app()
+    
+    banner()
+    app_name = input("\033[1;36m[+] Enter Your Apps Name: \033[1;32m")
 
-def run_project():
-    name = input("🚀 Name the project to: ")
-    os.system(f"python {name}/main.py")
+    if not app_name.strip():
+        print("\033[1;31m[!] ⚠️ Please Enter Your Apps Name!")
+        time.sleep(2)
+        create_app()
 
-def main():
-    while True:
-        print("\n🔹 Termux App Maker 🔹")
-        print("1️⃣ Create new project")
-        print("2️⃣ Code Edit")
-        print("3️⃣ Project start")
-        print("4️⃣ Exit")
+    banner()
+    save_path = input("\033[1;36m[+] Enter Your Drectory (Example: /sdcard/MyApp): \033[1;32m")
+
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+
+    apk_file = f"{save_path}/{app_name}.apk"
+
+    # অ্যাপ ফাইল তৈরি
+    with open(apk_file, "w") as f:
+        f.write(code)
+
+    print(f"\033[1;32m[✓] ✅ apps successfully created!\n")
+    print(f"\033[1;33m[💾]  your apps saving Directory: {apk_file}\n")
+    print("\033[1;34m[✔] Use your apps enjoy your life ")
+
+create_app()
         
-        choice = input("👉 your option 🔢: ")
-
-        if choice == "1":
-            create_project()
-        elif choice == "2":
-            edit_project()
-        elif choice == "3":
-            run_project()
-        elif choice == "4":
-            print("👋 out!")
-            break
-        else:
-            print("❌ Wrong option!")
-
-if __name__ == "__main__":
-    main()
