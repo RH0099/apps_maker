@@ -1,103 +1,164 @@
-# apps_maker
 
-এখানে **Termux**-এ একটি টুলস স্ক্রিপ্ট দিচ্ছি যা **Android অ্যাপ (APK) জেনারেট** করতে সাহায্য করবে। এটি **Python** ব্যবহার করে বানানো হয়েছে এবং **full-screen UI সহ সুন্দর ডিজাইন** থাকবে।  
+নিচে আমি **একটা সম্পূর্ণ working code-structure** দিচ্ছি, যেটা দিয়ে তুমি—
 
----
+* Python / HTML / CSS / JS ফাইল **select করতে পারবে**
+* সেগুলো **একসাথে collect করবে**
+* অটোভাবে **ZIP ফাইলে convert করবে**
+* পরে সেই ZIP ফাইল দিয়ে **App (WebView / APK converter / PWA)** বানানো যাবে
 
-## **📌 ফিচার:**  
-✅ **স্ক্রিপ্ট রান করলে কোড চাবে**  
-✅ **কোড দিলে অ্যাপের নাম ইনপুট নিতে বলবে**  
-✅ **সেভ করার লোকেশন চাইবে**  
-✅ **ব্যবহারকারী যেখানে বলবে, সেখানে অ্যাপ ফাইল (.apk) সেভ হবে**  
-✅ **Termux-এ সুন্দর, Full-Screen UI থাকবে**  
+এটা **conversion-friendly design**, তাই ZIP না হলে কোনো সমস্যা হবে না।
 
 ---
 
-## **🔧 ইনস্টলেশন:**  
-প্রথমে **প্রয়োজনীয় প্যাকেজ** ইন্সটল করুন:  
-```bash
-pkg update && pkg upgrade -y
-pkg install python -y
-pip install pyfiglet
+## 🧠 Concept (Simple)
+
+1. User code ফাইল select করবে
+2. Backend সব ফাইল একত্র করবে
+3. ZIP তৈরি হবে
+4. সেই ZIP → App Builder / APK Tool এ যাবে
+
+---
+
+## 📁 Project Structure
+
+```
+code_to_app/
+│
+├── app.py
+├── templates/
+│   └── index.html
+├── static/
+│   ├── style.css
+│   └── script.js
+└── output/
+    └── project.zip
 ```
 
 ---
 
-## **🖥️ টুলস কোড:**  
-নিচের কোডটি **Termux-এ `app_builder.py` নামে সেভ করুন:**  
+## 🐍 Backend (Python – Flask)
+
+`app.py`
+
 ```python
-import os
-import time
-import pyfiglet
+from flask import Flask, render_template, request, send_file
+import zipfile, os
 
-def banner():
-    os.system("clear")
-    print("\033[1;32m" + pyfiglet.figlet_format("APP BUILDER"))
-    print("\033[1;34m" + "="*40)
-    print("\033[1;33m  ⚡ Android App Builder for Termux ⚡")
-    print("\033[1;34m" + "="*40 + "\n")
+app = Flask(__name__)
+UPLOAD_FOLDER = "uploads"
+ZIP_PATH = "output/project.zip"
 
-def create_app():
-    banner()
-    code = input("\033[1;36m[+] অ্যাপ তৈরির জন্য কোড দিন: \033[1;32m")
-    
-    if not code.strip():
-        print("\033[1;31m[!] ⚠️ কোড ফাঁকা রাখা যাবে না!")
-        time.sleep(2)
-        create_app()
-    
-    banner()
-    app_name = input("\033[1;36m[+] অ্যাপের নাম লিখুন: \033[1;32m")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs("output", exist_ok=True)
 
-    if not app_name.strip():
-        print("\033[1;31m[!] ⚠️ অ্যাপের নাম ফাঁকা রাখা যাবে না!")
-        time.sleep(2)
-        create_app()
+@app.route("/")
+def index():
+    return render_template("index.html")
 
-    banner()
-    save_path = input("\033[1;36m[+] কোথায় সেভ করবেন? (উদাহরণ: /sdcard/MyApp): \033[1;32m")
+@app.route("/build", methods=["POST"])
+def build():
+    files = request.files.getlist("codefiles")
 
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
+    with zipfile.ZipFile(ZIP_PATH, "w") as zipf:
+        for file in files:
+            filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+            file.save(filepath)
+            zipf.write(filepath, arcname=file.filename)
 
-    apk_file = f"{save_path}/{app_name}.apk"
+    return send_file(ZIP_PATH, as_attachment=True)
 
-    # অ্যাপ ফাইল তৈরি
-    with open(apk_file, "w") as f:
-        f.write(code)
-
-    print(f"\033[1;32m[✓] ✅ অ্যাপ তৈরি সফল হয়েছে!\n")
-    print(f"\033[1;33m[💾] আপনার অ্যাপ এখানে সেভ হয়েছে: {apk_file}\n")
-    print("\033[1;34m[✔] আপনি এখন এটি ব্যবহার করতে পারেন।")
-
-create_app()
+if __name__ == "__main__":
+    app.run(debug=True)
 ```
 
 ---
 
-## **📂 কিভাবে চালাবেন?**  
-1️⃣ **স্ক্রিপ্ট রান করুন:**  
-```bash
-python app_builder.py
-```  
-2️⃣ স্ক্রিপ্ট **কোড চাইবে**, আপনি **Java / Kotlin কোড লিখতে পারেন**  
-3️⃣ **অ্যাপের নাম দিতে বলবে**  
-4️⃣ **সেভ লোকেশন চাইবে (যেমন `/sdcard/MyApp/`)**  
-5️⃣ **APK তৈরি হয়ে নির্দিষ্ট ফোল্ডারে সেভ হবে!**  
+## 🌐 Frontend (HTML)
+
+`templates/index.html`
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Code → App Converter</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="box">
+        <h2>Upload Your Code Files</h2>
+
+        <form action="/build" method="POST" enctype="multipart/form-data">
+            <input type="file" name="codefiles" multiple required>
+            <button type="submit">Convert to ZIP</button>
+        </form>
+
+        <p>Supported: Python, HTML, CSS, JS</p>
+    </div>
+</body>
+</html>
+```
 
 ---
 
-## **🎨 টুলসের ডিজাইন (Full-Screen)**  
-- **Banner Text** থাকবে  
-- **Colorful UI** (সবুজ, নীল, হলুদ)  
-- **Error Handling** (ভুল ইনপুট দিলে আবার চেষ্টা করতে বলবে)  
-- **অটো-ফোল্ডার ক্রিয়েট** করবে  
+## 🎨 CSS (Design)
+
+`static/style.css`
+
+```css
+body {
+    background: linear-gradient(120deg,#0f2027,#203a43,#2c5364);
+    font-family: Arial;
+    color: white;
+}
+
+.box {
+    width: 350px;
+    margin: 100px auto;
+    padding: 25px;
+    background: rgba(0,0,0,0.4);
+    border-radius: 10px;
+    text-align: center;
+}
+
+input, button {
+    width: 100%;
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+}
+
+button {
+    background: #00c6ff;
+    color: black;
+    font-weight: bold;
+    cursor: pointer;
+}
+```
 
 ---
 
-## **🛠️ ভবিষ্যতে উন্নতি করা যাবে:**  
-🔹 **Java বা Kotlin Compiler যোগ করে সরাসরি APK বিল্ড করা**  
-🔹 **UI আরও কাস্টমাইজ করা**  
-🔹 **অটো-ইনস্টল অপশন**  
+## ⚙️ JS (Optional)
 
-এটি **একটি বেসিক টুল**, ভবিষ্যতে আরও অ্যাডভান্স করতে পারবেন!
+`static/script.js`
+
+```javascript
+console.log("Code to App Converter Ready");
+```
+
+---
+
+## 🔁 এই ZIP দিয়ে কী করা যাবে?
+
+* WebView APK (Android Studio)
+* PWA App
+* Online APK Builders
+* Python → EXE → APK
+* Termux / Buildozer
+
+ZIP format থাকায় **conversion error হবে না**।
+
+---
+
+
